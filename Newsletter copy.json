@@ -1,0 +1,289 @@
+{
+  "name": "Newsletter copy",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -64
+      ],
+      "id": "e7d57ea1-d36b-4071-a2ff-e8f92ac98671",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://g1.globo.com/rss/g1/tecnologia/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        -224
+      ],
+      "id": "37c8149a-4899-422f-b18d-dcaad1a7ca1b",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "url": "https://forbes.com.br/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        48
+      ],
+      "id": "46000176-f7a6-4f39-83ed-71dd3ce5af89",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -224
+      ],
+      "id": "e2e95d22-c32c-4355-a725-729bdcd26516",
+      "name": "Limit"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        512,
+        48
+      ],
+      "id": "cb1a905b-ac1b-4fb1-8e3f-0e95c67b6772",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        -96
+      ],
+      "id": "591cd138-c022-43bd-8f22-eee870d315ed",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "title, content, link",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        -96
+      ],
+      "id": "8b348bf7-3ad9-46f6-b854-10379a0107b4",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -96
+      ],
+      "id": "532ee6c5-1f0a-4d68-bef2-79d80e1e1e11",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um curador de notícias especializado em tecnologia e economia.\nSeu trabalho é me dizer quais são as principais notícias desses temas da data de hoje, realizando um resumo de, no máximo, 50 palavras em 3 matérias escolhidas como as mais relevantes.\n\nCuradoria de notícias.\n{{ $json.posts.toJsonString() }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1504,
+        -96
+      ],
+      "id": "76c01d75-e902-4b60-a76a-b0fd3e2556f7",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pyRxZowAgeG9vzeh",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        -96
+      ],
+      "id": "acf3d4a7-ae85-4ece-b83e-fcd031f653ac",
+      "name": "Discord",
+      "webhookId": "b625a4bc-21c7-49f2-9176-d43df6502a41",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "8oE322JgqA75M9wf",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0d62afd0-0cb9-4a3e-9979-7fb428b3ada8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "be1249586435f7fb716436a8019733325ba9cb3b468af4178eb2738bb6c9ee2f"
+  },
+  "id": "YJGHmj7wPYoUPTkn",
+  "tags": []
+}
