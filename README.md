@@ -19,7 +19,7 @@ Este workflow automatiza a entrega diária de notícias relevantes para sua comu
 - Importe o workflow no n8n:
 1. Abra seu n8n
 2. Vá em "Workflows" > "Import from File"
-3. Selecione o arquivo news-discord-bot.json
+3. Selecione o arquivo ```Newsletter copy.json```
 
 - Configure as credenciais:
 1. Discord Webhook: Vá até o canal do Discord > Configurações > Integrações > Webhooks > Copie a URL
